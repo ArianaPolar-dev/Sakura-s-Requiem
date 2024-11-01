@@ -1,6 +1,18 @@
-let personaje, monstruos = [], teclas = [], vidas = 3, juegoTerminado = false;
-let tiempoMonstruoGrande = 2000; // Tiempo prolongado antes del jefe final
-let monstruoGrande = null;
+let personaje, enemigos = [], teclas = [], vidas = 3, juegoTerminado = false;
+let enemigosDerrotados = 0;
+let jefe = null;
+let fondoImg, personajeImg, personajeAtaqueImg, enemigoImg, jefeImg;
+let enAtaque = false;
+let tiempoAtaque = 30; // Duración del GIF de ataque en cuadros
+
+function preload() {
+    // Cargar las imágenes y GIFs
+    fondoImg = loadImage("ruta/al/fondo.png");
+    personajeImg = loadImage("assets/photo_2024-11-01_13-44-11.gif");
+    personajeAtaqueImg = loadImage("assets/photo_2024-11-01_18-32-59.gif"); // GIF de ataque
+    enemigoImg = loadImage("assets/photo_2024-11-01_18-43-44.jpg");
+    jefeImg = loadImage("assets/photo_2024-11-01_18-43-47.jpg");
+}
 
 function setup() {
     createCanvas(800, 400);
@@ -13,57 +25,62 @@ function draw() {
         return;
     }
 
+    // Mostrar fondo
     background(220);
-    
+    image(fondoImg, 0, 0, width, height);
+
     // Mostrar personaje
-    fill(0, 0, 255);
-    ellipse(personaje.x, personaje.y, personaje.size);
+    if (enAtaque && tiempoAtaque > 0) {
+        image(personajeAtaqueImg, personaje.x - 20, personaje.y - 20, 60, 60);
+        tiempoAtaque--;
+    } else {
+        image(personajeImg, personaje.x - 20, personaje.y - 20, 60, 60);
+        enAtaque = false; // Reset de ataque
+    }
 
-    // Mostrar y mover monstruos
-    for (let m of monstruos) {
-        fill(255, 0, 0);
-        ellipse(m.x, m.y, m.size);
-        m.x -= m.velocidad;
+    // Mostrar y mover enemigos
+    for (let enemigo of enemigos) {
+        image(enemigoImg, enemigo.x - 20, enemigo.y - 20, enemigo.size, enemigo.size);
+        enemigo.x -= enemigo.velocidad;
 
-        // Chequear colisión con monstruos pequeños
-        if (dist(m.x, m.y, personaje.x, personaje.y) < (m.size + personaje.size) / 2) {
+        // Colisión con enemigos pequeños
+        if (dist(enemigo.x, enemigo.y, personaje.x, personaje.y) < (enemigo.size + personaje.size) / 2) {
             vidas--;
             actualizarVidas();
             if (vidas <= 0) {
                 juegoTerminado = true;
             }
-            monstruos.splice(monstruos.indexOf(m), 1);
+            enemigos.splice(enemigos.indexOf(enemigo), 1);
         }
     }
 
-    // Condiciones para mostrar monstruo grande (jefe)
-    if (frameCount > tiempoMonstruoGrande && !monstruoGrande) {
-        monstruoGrande = crearMonstruo(true);
-        teclas = getRandomTeclas(9); // Genera combinación de 9 letras para el jefe
+    // Condiciones para mostrar jefe
+    if (enemigosDerrotados >= 10 && enemigos.length === 0 && !jefe) {
+        jefe = crearEnemigo(true);
+        teclas = getRandomTeclas(9);
     }
 
-    // Mostrar monstruo grande si existe
-    if (monstruoGrande) {
-        fill(150, 0, 0);
-        ellipse(monstruoGrande.x, monstruoGrande.y, monstruoGrande.size);
-        monstruoGrande.x -= monstruoGrande.velocidad;
+    // Mostrar jefe si existe
+    if (jefe) {
+        image(jefeImg, jefe.x - 40, jefe.y - 40, jefe.size, jefe.size);
+        jefe.x -= jefe.velocidad;
 
         // Colisión del jefe con el jugador
-        if (dist(monstruoGrande.x, monstruoGrande.y, personaje.x, personaje.y) < (monstruoGrande.size + personaje.size) / 2) {
-            vidas = 0; // Jefe quita todas las vidas de un golpe
+        if (dist(jefe.x, jefe.y, personaje.x, personaje.y) < (jefe.size + personaje.size) / 2) {
+            vidas = 0;
             actualizarVidas();
             juegoTerminado = true;
         }
     }
 
-    // Generar monstruos pequeños
-    if (frameCount % 120 === 0 && !monstruoGrande) {
-        monstruos.push(crearMonstruo());
-        teclas = getRandomTeclas(3); // Generar 3 teclas para monstruo pequeño
+    // Generar enemigos pequeños
+    if (frameCount % 120 === 0 && !jefe) {
+        enemigos.push(crearEnemigo());
+        teclas = getRandomTeclas(3);
     }
 
-    // Mostrar teclas necesarias solo si hay enemigos
-    if (monstruos.length > 0 || monstruoGrande) {
+    // Mostrar teclas necesarias
+    if (enemigos.length > 0 || jefe) {
         fill(0);
         textSize(24);
         text("Presiona: " + teclas.join(" "), 300, 50);
@@ -74,28 +91,31 @@ function keyPressed() {
     if (juegoTerminado || teclas.length === 0) return;
 
     if (key.toUpperCase() === teclas[0]) {
-        teclas.shift(); // Remover tecla correcta
+        teclas.shift();
 
         if (teclas.length === 0) { // Si todas las teclas fueron presionadas correctamente
-            if (monstruoGrande) {
-                // Derrota al jefe después de completar las 9 letras
-                monstruoGrande = null;
+            enAtaque = true;
+            tiempoAtaque = 30; // Reiniciar duración del ataque
+
+            if (jefe) {
+                jefe = null;
                 alert("¡FELICIDADES! Has derrotado al jefe.");
                 juegoTerminado = true;
-            } else if (monstruos.length > 0) {
-                monstruos.shift(); // Eliminar el monstruo más cercano
-                teclas = getRandomTeclas(3); // Nueva combinación para el siguiente enemigo
+            } else if (enemigos.length > 0) {
+                enemigos.shift();
+                teclas = getRandomTeclas(3);
+                enemigosDerrotados++;
             }
         }
     }
 }
 
-function crearMonstruo(grande = false) {
+function crearEnemigo(esJefe = false) {
     return {
         x: width,
-        y: personaje.y, // Aparece a la altura del jugador
-        size: grande ? 80 : 30,
-        velocidad: grande ? 2 : 4
+        y: personaje.y,
+        size: esJefe ? 80 : 30,
+        velocidad: esJefe ? 2 : 4
     };
 }
 
