@@ -6,7 +6,6 @@ let combinacionesRestantes = 3; // Combinaciones necesarias para derrotar al jef
 function setup() {
     createCanvas(800, 400);
     personaje = { x: 50, y: height / 2, size: 40 };
-    teclas = getRandomTeclas();
 }
 
 function draw() {
@@ -27,7 +26,7 @@ function draw() {
         ellipse(m.x, m.y, m.size);
         m.x -= m.velocidad;
 
-        // Chequear colisión
+        // Chequear colisión con monstruos pequeños
         if (dist(m.x, m.y, personaje.x, personaje.y) < (m.size + personaje.size) / 2) {
             vidas--;
             actualizarVidas();
@@ -41,6 +40,7 @@ function draw() {
     // Condiciones para mostrar monstruo grande
     if (frameCount > tiempoMonstruoGrande && !monstruoGrande) {
         monstruoGrande = crearMonstruo(true);
+        teclas = getRandomTeclas();  // Genera combinación inicial para el jefe
     }
 
     // Mostrar monstruo grande si existe
@@ -48,47 +48,48 @@ function draw() {
         fill(150, 0, 0);
         ellipse(monstruoGrande.x, monstruoGrande.y, monstruoGrande.size);
         monstruoGrande.x -= monstruoGrande.velocidad;
-        
+
+        // Colisión del jefe con el jugador
         if (dist(monstruoGrande.x, monstruoGrande.y, personaje.x, personaje.y) < (monstruoGrande.size + personaje.size) / 2) {
-            vidas--;
+            vidas = 0; // Jefe quita todas las vidas de un golpe
             actualizarVidas();
-            if (vidas <= 0) {
-                juegoTerminado = true;
-            }
-            monstruoGrande = null;
+            juegoTerminado = true;
         }
     }
 
     // Generar monstruos pequeños
     if (frameCount % 120 === 0 && !monstruoGrande) {
         monstruos.push(crearMonstruo());
+        teclas = getRandomTeclas(); // Generar teclas para monstruo pequeño
     }
 
-    // Mostrar teclas necesarias para atacar
-    fill(0);
-    textSize(24);
-    text("Presiona: " + teclas.join(" "), 300, 50);
+    // Mostrar teclas necesarias solo si hay enemigos
+    if (monstruos.length > 0 || monstruoGrande) {
+        fill(0);
+        textSize(24);
+        text("Presiona: " + teclas.join(" "), 300, 50);
+    }
 }
 
 function keyPressed() {
-    if (juegoTerminado) return;
+    if (juegoTerminado || teclas.length === 0) return;
 
     if (key.toUpperCase() === teclas[0]) {
         teclas.shift(); // Remover tecla correcta
         if (teclas.length === 0) { // Si todas las teclas fueron presionadas
             if (monstruoGrande && dist(monstruoGrande.x, monstruoGrande.y, personaje.x, personaje.y) < 100) {
                 combinacionesRestantes--;
-                if (combinacionesRestantes === 0) {
+                if (combinacionesRestantes === 0) { // Derrota al jefe después de 3 combinaciones
                     monstruoGrande = null;
-                    alert("¡FELICITACIONES! Has ganado.");
+                    alert("¡FELICIDADES! Has ganado.");
                     juegoTerminado = true;
                 } else {
                     teclas = getRandomTeclas(); // Obtener nueva combinación para el jefe
                 }
             } else if (monstruos.length > 0) {
                 monstruos.shift();
+                teclas = getRandomTeclas(); // Nueva combinación para siguiente enemigo
             }
-            teclas = getRandomTeclas();
         }
     }
 }
@@ -96,7 +97,7 @@ function keyPressed() {
 function crearMonstruo(grande = false) {
     return {
         x: width,
-        y: random(100, height - 100),
+        y: height / 2,
         size: grande ? 80 : 30,
         velocidad: grande ? 2 : 4
     };
