@@ -87,7 +87,7 @@ function keyPressed() {
                     teclas = getRandomTeclas(); // Obtener nueva combinación para el jefe
                 }
             } else if (monstruos.length > 0) {
-                monstruos.shift();
+                monstruos.shift(); // Eliminar el monstruo más cercano
                 teclas = getRandomTeclas(); // Nueva combinación para siguiente enemigo
             }
         }
@@ -97,7 +97,7 @@ function keyPressed() {
 function crearMonstruo(grande = false) {
     return {
         x: width,
-        y: height / 2,
+        y: personaje.y, // Aparece a la altura del jugador
         size: grande ? 80 : 30,
         velocidad: grande ? 2 : 4
     };
