@@ -1,7 +1,6 @@
 let personaje, monstruos = [], teclas = [], vidas = 3, juegoTerminado = false;
 let tiempoMonstruoGrande = 2000; // Tiempo prolongado antes del jefe final
 let monstruoGrande = null;
-let combinacionesRestantes = 3; // Combinaciones necesarias para derrotar al jefe
 
 function setup() {
     createCanvas(800, 400);
@@ -37,12 +36,13 @@ function draw() {
         }
     }
 
-    // Mostrar monstruo grande (jefe) si existe y no ha sido derrotado
+    // Condiciones para mostrar monstruo grande (jefe)
     if (frameCount > tiempoMonstruoGrande && !monstruoGrande) {
         monstruoGrande = crearMonstruo(true);
-        teclas = getRandomTeclas(); // Genera la combinación inicial para el jefe
+        teclas = getRandomTeclas(9); // Genera combinación de 9 letras para el jefe
     }
 
+    // Mostrar monstruo grande si existe
     if (monstruoGrande) {
         fill(150, 0, 0);
         ellipse(monstruoGrande.x, monstruoGrande.y, monstruoGrande.size);
@@ -59,7 +59,7 @@ function draw() {
     // Generar monstruos pequeños
     if (frameCount % 120 === 0 && !monstruoGrande) {
         monstruos.push(crearMonstruo());
-        teclas = getRandomTeclas(); // Generar teclas para monstruo pequeño
+        teclas = getRandomTeclas(3); // Generar 3 teclas para monstruo pequeño
     }
 
     // Mostrar teclas necesarias solo si hay enemigos
@@ -77,19 +77,14 @@ function keyPressed() {
         teclas.shift(); // Remover tecla correcta
 
         if (teclas.length === 0) { // Si todas las teclas fueron presionadas correctamente
-            if (monstruoGrande && dist(monstruoGrande.x, monstruoGrande.y, personaje.x, personaje.y) < 100) {
-                combinacionesRestantes--;
-                
-                if (combinacionesRestantes === 0) { // Derrota al jefe después de 3 combinaciones
-                    monstruoGrande = null;
-                    alert("¡FELICIDADES! Has ganado.");
-                    juegoTerminado = true;
-                } else {
-                    teclas = getRandomTeclas(); // Obtener nueva combinación para el jefe
-                }
+            if (monstruoGrande) {
+                // Derrota al jefe después de completar las 9 letras
+                monstruoGrande = null;
+                alert("¡FELICIDADES! Has derrotado al jefe.");
+                juegoTerminado = true;
             } else if (monstruos.length > 0) {
                 monstruos.shift(); // Eliminar el monstruo más cercano
-                teclas = getRandomTeclas(); // Nueva combinación para el siguiente enemigo
+                teclas = getRandomTeclas(3); // Nueva combinación para el siguiente enemigo
             }
         }
     }
@@ -104,9 +99,9 @@ function crearMonstruo(grande = false) {
     };
 }
 
-function getRandomTeclas() {
+function getRandomTeclas(num) {
     const teclasDisponibles = ["A", "S", "D", "W"];
-    return Array.from({ length: 3 }, () => random(teclasDisponibles));
+    return Array.from({ length: num }, () => random(teclasDisponibles));
 }
 
 function actualizarVidas() {
