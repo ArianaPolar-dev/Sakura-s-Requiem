@@ -1,5 +1,5 @@
-let personaje, monstruos = [], teclas, vidas = 3, juegoTerminado = false;
-let tiempoMonstruoGrande = 2000;  // Tiempo prolongado antes del jefe final
+let personaje, monstruos = [], teclas = [], vidas = 3, juegoTerminado = false;
+let tiempoMonstruoGrande = 2000; // Tiempo prolongado antes del jefe final
 let monstruoGrande = null;
 let combinacionesRestantes = 3; // Combinaciones necesarias para derrotar al jefe
 
@@ -37,13 +37,12 @@ function draw() {
         }
     }
 
-    // Condiciones para mostrar monstruo grande
+    // Mostrar monstruo grande (jefe) si existe y no ha sido derrotado
     if (frameCount > tiempoMonstruoGrande && !monstruoGrande) {
         monstruoGrande = crearMonstruo(true);
-        teclas = getRandomTeclas();  // Genera combinación inicial para el jefe
+        teclas = getRandomTeclas(); // Genera la combinación inicial para el jefe
     }
 
-    // Mostrar monstruo grande si existe
     if (monstruoGrande) {
         fill(150, 0, 0);
         ellipse(monstruoGrande.x, monstruoGrande.y, monstruoGrande.size);
@@ -76,9 +75,11 @@ function keyPressed() {
 
     if (key.toUpperCase() === teclas[0]) {
         teclas.shift(); // Remover tecla correcta
-        if (teclas.length === 0) { // Si todas las teclas fueron presionadas
+
+        if (teclas.length === 0) { // Si todas las teclas fueron presionadas correctamente
             if (monstruoGrande && dist(monstruoGrande.x, monstruoGrande.y, personaje.x, personaje.y) < 100) {
                 combinacionesRestantes--;
+                
                 if (combinacionesRestantes === 0) { // Derrota al jefe después de 3 combinaciones
                     monstruoGrande = null;
                     alert("¡FELICIDADES! Has ganado.");
@@ -88,7 +89,7 @@ function keyPressed() {
                 }
             } else if (monstruos.length > 0) {
                 monstruos.shift(); // Eliminar el monstruo más cercano
-                teclas = getRandomTeclas(); // Nueva combinación para siguiente enemigo
+                teclas = getRandomTeclas(); // Nueva combinación para el siguiente enemigo
             }
         }
     }
