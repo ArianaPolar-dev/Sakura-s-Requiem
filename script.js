@@ -8,15 +8,16 @@ let tiempoAtaque = 30; // Duración del GIF de ataque en cuadros
 function preload() {
     // Cargar las imágenes y GIFs
     fondoImg = loadImage("assets/11 Free Pixel Art Backgrounds for Games - UnLucky Studio.jpeg");
-    personajeImg = loadImage("assets/photo_2024-11-01_13-44-11.gif");
-    personajeAtaqueImg = loadImage("assets/photo_2024-11-01_18-32-59.gif"); // GIF de ataque
-    enemigoImg = loadImage("assets/photo_2024-11-01_18-43-44.jpg");
-    jefeImg = loadImage("assets/photo_2024-11-01_18-43-47.jpg");
+    personajeImg = loadImage("assets/photo-2024-11-01-13-44-11-unscreen.gif");
+    personajeAtaqueImg = loadImage("assets/photo-2024-11-01-18-32-59-unscreen.gif"); // GIF de ataque
+    enemigoImg = loadImage("assets/photo_2024-11-01_19-06-50-removebg-preview.png");
+    jefeImg = loadImage("assets/photo_2024-11-01_19-06-47-removebg-preview.png");
 }
 
 function setup() {
     createCanvas(800, 400);
-    personaje = { x: 50, y: height / 2, size: 40 };
+    // Posicionar el personaje más abajo (3/4 de la altura de la pantalla)
+    personaje = { x: 50, y: height * 0.75, size: 40 };
 }
 
 function draw() {
@@ -81,7 +82,7 @@ function draw() {
 
     // Mostrar teclas necesarias
     if (enemigos.length > 0 || jefe) {
-        fill(0);
+        fill(255); // Cambia el color del texto a blanco
         textSize(24);
         text("Presiona: " + teclas.join(" "), 300, 50);
     }
@@ -113,7 +114,7 @@ function keyPressed() {
 function crearEnemigo(esJefe = false) {
     return {
         x: width,
-        y: personaje.y,
+        y: height * 0.75, // Los enemigos aparecen a la misma altura que el personaje
         size: esJefe ? 80 : 30,
         velocidad: esJefe ? 2 : 4
     };
