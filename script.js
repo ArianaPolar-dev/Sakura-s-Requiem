@@ -7,7 +7,7 @@ let tiempoAtaque = 30; // Duración del GIF de ataque en cuadros
 
 function preload() {
     // Cargar las imágenes y GIFs
-    fondoImg = loadImage("ruta/al/fondo.png");
+    fondoImg = loadImage("assets/11 Free Pixel Art Backgrounds for Games - UnLucky Studio.jpeg");
     personajeImg = loadImage("assets/photo_2024-11-01_13-44-11.gif");
     personajeAtaqueImg = loadImage("assets/photo_2024-11-01_18-32-59.gif"); // GIF de ataque
     enemigoImg = loadImage("assets/photo_2024-11-01_18-43-44.jpg");
